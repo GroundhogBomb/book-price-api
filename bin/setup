@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+require "fileutils"
+FileUtils.chdir(File.expand_path("..", __dir__)) do
+  system("bundle check") || system("bundle install", exception: true)
+  puts "Dependencies are installed. Run bin/mongo-start when needed, then bin/rails server."
+end

@@ -1,0 +1,34 @@
+#!/bin/bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+PIDFILE="$ROOT/tmp/pids/mongodb.pid"
+if [[ ! -f "$PIDFILE" ]]; then
+  echo "Project MongoDB is not running."
+  exit 0
+fi
+PID="$(cat "$PIDFILE")"
+if [[ ! "$PID" =~ ^[0-9]+$ ]]; then
+  echo "Invalid PID file; refusing to stop the process." >&2
+  exit 1
+fi
+if ! kill -0 "$PID" 2>/dev/null; then
+  rm -f "$PIDFILE"
+  echo "Project MongoDB is already stopped."
+  exit 0
+fi
+COMMAND="$(ps -p "$PID" -o command=)"
+if [[ "$COMMAND" != *mongod* || "$COMMAND" != *"$ROOT/storage/mongodb"* ]]; then
+  echo "PID does not belong to project MongoDB; refusing to stop it." >&2
+  exit 1
+fi
+kill -TERM "$PID"
+for ((i=0; i<30; i++)); do
+  if ! kill -0 "$PID" 2>/dev/null; then
+    rm -f "$PIDFILE"
+    echo "Project MongoDB has stopped."
+    exit 0
+  fi
+  sleep 1
+done
+echo "MongoDB is still shutting down; check log/mongodb.log." >&2
+exit 1

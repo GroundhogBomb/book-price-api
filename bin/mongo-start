@@ -1,0 +1,13 @@
+#!/bin/bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+PIDFILE="$ROOT/tmp/pids/mongodb.pid"
+mkdir -p "$ROOT/storage/mongodb" "$ROOT/tmp/pids" "$ROOT/log"
+if [[ -f "$PIDFILE" ]] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+  echo "Project MongoDB is already running."
+  exit 0
+fi
+MONGOD="$(brew --prefix mongodb-community@8.0)/bin/mongod"
+exec "$MONGOD" --dbpath "$ROOT/storage/mongodb" \
+  --logpath "$ROOT/log/mongodb.log" --pidfilepath "$PIDFILE" \
+  --bind_ip 127.0.0.1 --port 27017 --wiredTigerCacheSizeGB 0.25 --fork

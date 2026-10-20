@@ -1,0 +1,10 @@
+books_to_scrape:
+  open_timeout: 10
+  read_timeout: 20
+  write_timeout: 10
+  max_attempts: 3
+  interval: 1.0
+  user_agent: "BookPriceAPI/1.0 (educational portfolio scraper; books.toscrape.com only)"
+  max_pages: null # null = full site; MAX_PAGES is an optional CLI override.
+  critical_rejection_ratio: 0.25 # Fraction of fetched details missing/invalid price, rating or UPC.
+  expected_page_size: 20 # Advisory only; never rejects a batch by itself.
